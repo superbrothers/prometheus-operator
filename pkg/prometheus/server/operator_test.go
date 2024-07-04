@@ -16,7 +16,6 @@ package prometheus
 
 import (
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 	appsv1 "k8s.io/api/apps/v1"
@@ -260,42 +259,29 @@ func TestStatefulSetKeyToPrometheusKey(t *testing.T) {
 }
 
 func TestShouldDelete(t *testing.T) {
-	now := time.Now()
-	o := &Operator{
-		now: func() time.Time { return now },
-	}
-
+	o := &Operator{}
 	for _, tc := range []struct {
-		name                 string
-		featureGateEnabled   bool
-		stsDeletionTimestamp string
-		retentionPolicy      monitoringv1.WhenScaledDownRetentionType
-		expecedDecision      bool
+		name               string
+		featureGateEnabled bool
+		retentionPolicy    monitoringv1.WhenScaledDownRetentionType
+		shouldDelete       bool
 	}{
 		{
 			name:               "feature gate disabled - always delete",
 			featureGateEnabled: false,
-			expecedDecision:    true,
+			shouldDelete:       true,
 		},
 		{
 			name:               "delete policy",
 			featureGateEnabled: true,
 			retentionPolicy:    monitoringv1.WhenScaledDownRetentionTypeDelete,
-			expecedDecision:    true,
+			shouldDelete:       true,
 		},
 		{
-			name:                 "retention in the past",
-			featureGateEnabled:   true,
-			stsDeletionTimestamp: now.Add(time.Hour * -1).Format(time.RFC3339),
-			retentionPolicy:      monitoringv1.WhenScaledDownRetentionTypeRetain,
-			expecedDecision:      true,
-		},
-		{
-			name:                 "retention in the future",
-			featureGateEnabled:   true,
-			stsDeletionTimestamp: now.Add(time.Hour * 1).Format(time.RFC3339),
-			retentionPolicy:      monitoringv1.WhenScaledDownRetentionTypeRetain,
-			expecedDecision:      false,
+			name:               "retain policy",
+			featureGateEnabled: true,
+			retentionPolicy:    monitoringv1.WhenScaledDownRetentionTypeRetain,
+			shouldDelete:       false,
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -307,17 +293,10 @@ func TestShouldDelete(t *testing.T) {
 					},
 				},
 			}
-			sts := appsv1.StatefulSet{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: map[string]string{
-						"operator.prometheus.io/deletion-timestamp": tc.stsDeletionTimestamp,
-					},
-				},
-			}
 
-			decision, err := o.shouldDelete(&p, &sts)
+			decision, err := o.shouldDelete(&p)
 			require.NoError(t, err)
-			require.Equal(t, tc.expecedDecision, decision)
+			require.Equal(t, tc.shouldDelete, decision)
 		})
 	}
 }

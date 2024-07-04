@@ -99,8 +99,6 @@ type Operator struct {
 	retentionPoliciesEnabled bool
 
 	eventRecorder record.EventRecorder
-
-	now func() time.Time // In real environments, this is time.Now. In tests, it can be mocked.
 }
 
 type ControllerOptions func(*Operator)
@@ -166,7 +164,6 @@ func New(ctx context.Context, restConfig *rest.Config, c operator.Config, logger
 		controllerID:             c.ControllerID,
 		eventRecorder:            erf(client, controllerName),
 		retentionPoliciesEnabled: c.Gates.Enabled(operator.PrometheusShardRetentionPolicyFeature),
-		now:                      time.Now,
 	}
 	// Process options, enabling or disabling features.
 	for _, opt := range opts {
@@ -966,7 +963,7 @@ func (c *Operator) sync(ctx context.Context, key string) error {
 			return
 		}
 
-		shouldDelete, err := c.shouldDelete(p, s)
+		shouldDelete, err := c.shouldDelete(p)
 		if err != nil {
 			level.Error(c.logger).Log("err", err, "name", s.GetName(), "namespace", s.GetNamespace())
 			return
@@ -986,43 +983,19 @@ func (c *Operator) sync(ctx context.Context, key string) error {
 	return nil
 }
 
-func (c *Operator) shouldDelete(p *monitoringv1.Prometheus, sts *appsv1.StatefulSet) (bool, error) {
+// As the ShardRetentionPolicy feature evolves, should delete will evolve accordingly.
+// For now, shouldDelete just returns the approapriate boolean based on the retention type.
+func (c *Operator) shouldDelete(p *monitoringv1.Prometheus) (bool, error) {
 	if !c.retentionPoliciesEnabled {
 		// Feature-gate is disabled, default behavior is always to delete.
 		return true, nil
 	}
 
-	srp := p.Spec.ShardRetentionPolicy
-	if srp == nil || srp.WhenScaledDown == monitoringv1.WhenScaledDownRetentionTypeDelete {
+	if p.Spec.ShardRetentionPolicy.WhenScaledDown == monitoringv1.WhenScaledDownRetentionTypeDelete {
 		return true, nil
 	}
 
-	retentionAnnotation, ok := sts.Annotations[deletionTimestampAnnotation]
-	if !ok {
-		// This statefulset was not marked for deletion yet. Let's just add the annotation and return.
-		sts.Annotations[deletionTimestampAnnotation] = c.getRetentionDate(p)
-		return false, nil
-	}
-	retentionAsTime, err := time.Parse(time.RFC3339, retentionAnnotation)
-	if err != nil {
-		return false, fmt.Errorf("failed to parse retention annotation %q: %w", deletionTimestampAnnotation, err)
-	}
-	if c.now().After(retentionAsTime) {
-		return true, nil
-	}
-
-	// We should never get here, but just in case we do, we return false for safety.
 	return false, nil
-}
-
-// getRetentionDate returns the date when the StatefulSet should be deleted.
-// This should be called only when ShardRetentionPolicy is set to `Retain`.
-func (c *Operator) getRetentionDate(_ *monitoringv1.Prometheus) string {
-	//Retention policy set to Retain, but for now we don't evaluate retention period.
-
-	// e.g. ShardRetentionPolicy.Retention or Retention, we retain "forever".
-	// 100 Years.
-	return c.now().Add(24 * time.Hour * 365 * 100).Format(time.RFC3339)
 }
 
 // UpdateStatus updates the status subresource of the object identified by the given
