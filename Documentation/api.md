@@ -14184,7 +14184,7 @@ WhenScaledDownRetentionType
 </td>
 <td>
 <p>WhenScaledDown defines the retention policy when the Prometheus Server is scaled-down.
-When set to retain, the shard will only stop scraping targets and will retain the data.
+When set to <code>Retain</code>, the operator will keep the pods from the scaled-down shard(s). The pods won&rsquo;t scrape targets anymore but they can still be queried.
 The targets scraped by the scaled-down shard(s) are redistributed to the remaining shards.</p>
 <p>Default: &ldquo;Delete&rdquo;</p>
 </td>
