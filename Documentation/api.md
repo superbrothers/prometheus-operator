@@ -1822,6 +1822,39 @@ namespace only.</p>
 </tr>
 <tr>
 <td>
+<code>remoteWriteSelector</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.31/#labelselector-v1-meta">
+Kubernetes meta/v1.LabelSelector
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>RemoteWrite objects to be selected. An empty label selector matches all
+objects. A null label selector matches no objects.</p>
+<p>Note that the RemoteWrite custom resource definition is currently at Alpha level.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>remoteWriteNamespaceSelector</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.31/#labelselector-v1-meta">
+Kubernetes meta/v1.LabelSelector
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Namespaces to match for RemoteWrite discovery. An empty label selector
+matches all namespaces. A null label selector matches the current
+namespace only.</p>
+<p>Note that the RemoteWrite custom resource definition is currently at Alpha level.</p>
+</td>
+</tr>
+<tr>
+<td>
 <code>version</code><br/>
 <em>
 string
@@ -6980,6 +7013,39 @@ namespace only.</p>
 </tr>
 <tr>
 <td>
+<code>remoteWriteSelector</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.31/#labelselector-v1-meta">
+Kubernetes meta/v1.LabelSelector
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>RemoteWrite objects to be selected. An empty label selector matches all
+objects. A null label selector matches no objects.</p>
+<p>Note that the RemoteWrite custom resource definition is currently at Alpha level.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>remoteWriteNamespaceSelector</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.31/#labelselector-v1-meta">
+Kubernetes meta/v1.LabelSelector
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Namespaces to match for RemoteWrite discovery. An empty label selector
+matches all namespaces. A null label selector matches the current
+namespace only.</p>
+<p>Note that the RemoteWrite custom resource definition is currently at Alpha level.</p>
+</td>
+</tr>
+<tr>
+<td>
 <code>version</code><br/>
 <em>
 string
@@ -11836,6 +11902,39 @@ Kubernetes meta/v1.LabelSelector
 matches all namespaces. A null label selector matches the current
 namespace only.</p>
 <p>Note that the ScrapeConfig custom resource definition is currently at Alpha level.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>remoteWriteSelector</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.31/#labelselector-v1-meta">
+Kubernetes meta/v1.LabelSelector
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>RemoteWrite objects to be selected. An empty label selector matches all
+objects. A null label selector matches no objects.</p>
+<p>Note that the RemoteWrite custom resource definition is currently at Alpha level.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>remoteWriteNamespaceSelector</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.31/#labelselector-v1-meta">
+Kubernetes meta/v1.LabelSelector
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Namespaces to match for RemoteWrite discovery. An empty label selector
+matches all namespaces. A null label selector matches the current
+namespace only.</p>
+<p>Note that the RemoteWrite custom resource definition is currently at Alpha level.</p>
 </td>
 </tr>
 <tr>
@@ -18608,6 +18707,39 @@ Kubernetes meta/v1.LabelSelector
 matches all namespaces. A null label selector matches the current
 namespace only.</p>
 <p>Note that the ScrapeConfig custom resource definition is currently at Alpha level.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>remoteWriteSelector</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.31/#labelselector-v1-meta">
+Kubernetes meta/v1.LabelSelector
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>RemoteWrite objects to be selected. An empty label selector matches all
+objects. A null label selector matches no objects.</p>
+<p>Note that the RemoteWrite custom resource definition is currently at Alpha level.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>remoteWriteNamespaceSelector</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.31/#labelselector-v1-meta">
+Kubernetes meta/v1.LabelSelector
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Namespaces to match for RemoteWrite discovery. An empty label selector
+matches all namespaces. A null label selector matches the current
+namespace only.</p>
+<p>Note that the RemoteWrite custom resource definition is currently at Alpha level.</p>
 </td>
 </tr>
 <tr>
@@ -26966,6 +27098,39 @@ Kubernetes meta/v1.LabelSelector
 matches all namespaces. A null label selector matches the current
 namespace only.</p>
 <p>Note that the ScrapeConfig custom resource definition is currently at Alpha level.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>remoteWriteSelector</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.31/#labelselector-v1-meta">
+Kubernetes meta/v1.LabelSelector
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>RemoteWrite objects to be selected. An empty label selector matches all
+objects. A null label selector matches no objects.</p>
+<p>Note that the RemoteWrite custom resource definition is currently at Alpha level.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>remoteWriteNamespaceSelector</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.31/#labelselector-v1-meta">
+Kubernetes meta/v1.LabelSelector
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Namespaces to match for RemoteWrite discovery. An empty label selector
+matches all namespaces. A null label selector matches the current
+namespace only.</p>
+<p>Note that the RemoteWrite custom resource definition is currently at Alpha level.</p>
 </td>
 </tr>
 <tr>

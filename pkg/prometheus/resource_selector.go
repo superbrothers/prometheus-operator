@@ -1596,3 +1596,248 @@ func (rs *ResourceSelector) validateIonosSDConfigs(ctx context.Context, sc *moni
 	}
 	return nil
 }
+
+// SelectRemoteWrites selects RemoteWrites based on the selectors in the Prometheus CR and filters them
+// returning only those with a valid configuration.
+func (rs *ResourceSelector) SelectRemoteWrites(ctx context.Context, listFn ListAllByNamespaceFn) (map[string]*monitoringv1alpha1.RemoteWrite, error) {
+	cpf := rs.p.GetCommonPrometheusFields()
+	objMeta := rs.p.GetObjectMeta()
+	namespaces := []string{}
+
+	// Selectors might overlap. Deduplicate them along the keyFunc.
+	remoteWrites := make(map[string]*monitoringv1alpha1.RemoteWrite)
+
+	rwSelector, err := metav1.LabelSelectorAsSelector(cpf.RemoteWriteSelector)
+	if err != nil {
+		return nil, err
+	}
+
+	// If 'RemoteWriteNamespaceSelector' is nil only check own namespace.
+	if cpf.RemoteWriteNamespaceSelector == nil {
+		namespaces = append(namespaces, objMeta.GetNamespace())
+	} else {
+		rwNSSelector, err := metav1.LabelSelectorAsSelector(cpf.RemoteWriteNamespaceSelector)
+		if err != nil {
+			return nil, err
+		}
+
+		namespaces, err = operator.ListMatchingNamespaces(rwNSSelector, rs.namespaceInformers)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	rs.l.Debug("filtering namespaces to select RemoteWrites from", "namespaces", strings.Join(namespaces, ","), "namespace", objMeta.GetNamespace(), "prometheus", objMeta.GetName())
+
+	for _, ns := range namespaces {
+		err := listFn(ns, rwSelector, func(obj interface{}) {
+			if k, ok := rs.accessor.MetaNamespaceKey(obj); ok {
+				remoteWrite := obj.(*monitoringv1alpha1.RemoteWrite).DeepCopy()
+				if err := k8sutil.AddTypeInformationToObject(remoteWrite); err != nil {
+					rs.l.Error("failed to set RemoteWrite type information", "namespace", ns, "err", err)
+					return
+				}
+				remoteWrites[k] = remoteWrite
+			}
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to list RemoteWrites in namespace %s: %w", ns, err)
+		}
+	}
+
+	var rejected int
+	res := make(map[string]*monitoringv1alpha1.RemoteWrite, len(remoteWrites))
+
+	for rwName, rw := range remoteWrites {
+		/*
+			rejectFn := func(sc *monitoringv1alpha1.RemoteWrite, err error) {
+				rejected++
+				rs.l.Warn("skipping remotewrite",
+					"error", err.Error(),
+					"remotewrite", rwName,
+					"namespace", objMeta.GetNamespace(),
+					"prometheus", objMeta.GetName(),
+				)
+				rs.eventRecorder.Eventf(sc, v1.EventTypeWarning, operator.InvalidConfigurationEvent, "RemoteWrite %s was rejected due to invalid configuration: %v", rw.GetName(), err)
+			}
+		*/
+
+		/*
+			if err = validateScrapeClass(rs.p, sc.Spec.ScrapeClassName); err != nil {
+				rejectFn(sc, err)
+				continue
+			}
+
+			if err = rs.ValidateRelabelConfigs(sc.Spec.RelabelConfigs); err != nil {
+				rejectFn(sc, fmt.Errorf("relabelConfigs: %w", err))
+				continue
+			}
+
+			if err = rs.store.AddBasicAuth(ctx, sc.GetNamespace(), sc.Spec.BasicAuth); err != nil {
+				rejectFn(sc, err)
+				continue
+			}
+
+			if err = rs.store.AddSafeAuthorizationCredentials(ctx, sc.GetNamespace(), sc.Spec.Authorization); err != nil {
+				rejectFn(sc, err)
+				continue
+			}
+
+			if err = rs.store.AddOAuth2(ctx, sc.GetNamespace(), sc.Spec.OAuth2); err != nil {
+				rejectFn(sc, err)
+				continue
+			}
+
+			if err = rs.store.AddSafeTLSConfig(ctx, sc.GetNamespace(), sc.Spec.TLSConfig); err != nil {
+				rejectFn(sc, err)
+				continue
+			}
+
+			var scrapeInterval, scrapeTimeout monitoringv1.Duration = "", ""
+			if sc.Spec.ScrapeInterval != nil {
+				scrapeInterval = *sc.Spec.ScrapeInterval
+			}
+
+			if sc.Spec.ScrapeTimeout != nil {
+				scrapeTimeout = *sc.Spec.ScrapeTimeout
+			}
+
+			if err = validateScrapeIntervalAndTimeout(rs.p, scrapeInterval, scrapeTimeout); err != nil {
+				rejectFn(sc, err)
+				continue
+			}
+
+			if err = addProxyConfigToStore(ctx, sc.Spec.ProxyConfig, rs.store, sc.GetNamespace()); err != nil {
+				rejectFn(sc, err)
+				continue
+			}
+
+			if err = rs.ValidateRelabelConfigs(sc.Spec.MetricRelabelConfigs); err != nil {
+				rejectFn(sc, fmt.Errorf("metricRelabelConfigs: %w", err))
+				continue
+			}
+
+			// The Kubernetes API can't do the validation (for now) because kubebuilder validation markers don't work on map keys with custom type.
+			// https://github.com/prometheus-operator/prometheus-operator/issues/6889
+			if err = rs.validateStaticConfig(sc); err != nil {
+				rejectFn(sc, fmt.Errorf("staticConfigs: %w", err))
+				continue
+			}
+
+			if err = rs.validateHTTPSDConfigs(ctx, sc); err != nil {
+				rejectFn(sc, fmt.Errorf("httpSDConfigs: %w", err))
+				continue
+			}
+
+			if err = rs.validateKubernetesSDConfigs(ctx, sc); err != nil {
+				rejectFn(sc, fmt.Errorf("kubernetesSDConfigs: %w", err))
+				continue
+			}
+
+			if err = rs.validateConsulSDConfigs(ctx, sc); err != nil {
+				rejectFn(sc, fmt.Errorf("consulSDConfigs: %w", err))
+				continue
+			}
+
+			if err = rs.validateDNSSDConfigs(sc); err != nil {
+				rejectFn(sc, fmt.Errorf("dnsSDConfigs: %w", err))
+				continue
+			}
+
+			if err = rs.validateEC2SDConfigs(ctx, sc); err != nil {
+				rejectFn(sc, fmt.Errorf("ec2SDConfigs: %w", err))
+				continue
+			}
+
+			if err = rs.validateAzureSDConfigs(ctx, sc); err != nil {
+				rejectFn(sc, fmt.Errorf("azureSDConfigs: %w", err))
+				continue
+			}
+
+			if err = rs.validateOpenStackSDConfigs(ctx, sc); err != nil {
+				rejectFn(sc, fmt.Errorf("openstackSDConfigs: %w", err))
+				continue
+			}
+
+			if err = rs.validateDigitalOceanSDConfigs(ctx, sc); err != nil {
+				rejectFn(sc, fmt.Errorf("digitalOceanSDConfigs: %w", err))
+				continue
+			}
+
+			if err = rs.validateKumaSDConfigs(ctx, sc); err != nil {
+				rejectFn(sc, fmt.Errorf("kumaSDConfigs: %w", err))
+				continue
+			}
+
+			if err = rs.validateEurekaSDConfigs(ctx, sc); err != nil {
+				rejectFn(sc, fmt.Errorf("eurekaSDConfigs: %w", err))
+				continue
+			}
+
+			if err = rs.validateDockerSDConfigs(ctx, sc); err != nil {
+				rejectFn(sc, fmt.Errorf("dockerSDConfigs: %w", err))
+				continue
+			}
+
+			if err = rs.validateLinodeSDConfigs(ctx, sc); err != nil {
+				rejectFn(sc, fmt.Errorf("linodeSDConfigs: %w", err))
+				continue
+			}
+
+			if err = rs.validateHetznerSDConfigs(ctx, sc); err != nil {
+				rejectFn(sc, fmt.Errorf("hetznerSDConfigs: %w", err))
+				continue
+			}
+
+			if err = rs.validateNomadSDConfigs(ctx, sc); err != nil {
+				rejectFn(sc, fmt.Errorf("nomadSDConfigs: %w", err))
+				continue
+			}
+
+			if err = rs.validateDockerSwarmSDConfigs(ctx, sc); err != nil {
+				rejectFn(sc, fmt.Errorf("dockerswarmSDConfigs: %w", err))
+				continue
+			}
+
+			if err = rs.validatePuppetDBSDConfigs(ctx, sc); err != nil {
+				rejectFn(sc, fmt.Errorf("puppetDBSDConfigs: %w", err))
+				continue
+			}
+
+			if err = rs.validateLightSailSDConfigs(ctx, sc); err != nil {
+				rejectFn(sc, fmt.Errorf("lightSailSDConfigs: %w", err))
+				continue
+			}
+
+			if err = rs.validateOVHCloudSDConfigs(ctx, sc); err != nil {
+				rejectFn(sc, fmt.Errorf("OVHCloudSDConfigs: %w", err))
+				continue
+			}
+
+			if err = rs.validateScalewaySDConfigs(ctx, sc); err != nil {
+				rejectFn(sc, fmt.Errorf("ScalewaySDConfigs: %w", err))
+				continue
+			}
+
+			if err = rs.validateIonosSDConfigs(ctx, sc); err != nil {
+				rejectFn(sc, fmt.Errorf("IonosSDConfigs: %w", err))
+				continue
+			}
+		*/
+
+		res[rwName] = rw
+	}
+
+	remoteWriteKeys := make([]string, 0)
+	for k := range res {
+		remoteWriteKeys = append(remoteWriteKeys, k)
+	}
+	rs.l.Debug("selected ScrapeConfigs", "remoteWrite", strings.Join(remoteWriteKeys, ","), "namespace", objMeta.GetNamespace(), "prometheus", objMeta.GetName())
+
+	if sKey, ok := rs.accessor.MetaNamespaceKey(rs.p); ok {
+		rs.metrics.SetSelectedResources(sKey, monitoringv1alpha1.RemoteWritesKind, len(res))
+		rs.metrics.SetRejectedResources(sKey, monitoringv1alpha1.RemoteWritesKind, rejected)
+	}
+
+	return res, nil
+}

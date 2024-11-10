@@ -348,6 +348,30 @@ func run(fs *flag.FlagSet) int {
 		promAgentControllerOptions = append(promAgentControllerOptions, prometheusagentcontroller.WithScrapeConfig())
 	}
 
+	remoteWriteSupported, err := checkPrerequisites(
+		ctx,
+		logger,
+		kclient,
+		cfg.Namespaces.AllowList.Slice(),
+		monitoringv1alpha1.SchemeGroupVersion,
+		monitoringv1alpha1.RemoteWriteName,
+		k8sutil.ResourceAttribute{
+			Group:    monitoring.GroupName,
+			Version:  monitoringv1alpha1.Version,
+			Resource: monitoringv1alpha1.RemoteWriteName,
+			Verbs:    []string{"get", "list", "watch"},
+		},
+	)
+	if err != nil {
+		logger.Error("failed to check remoteWrite support", "err", err)
+		cancel()
+		return 1
+	}
+	if remoteWriteSupported {
+		promControllerOptions = append(promControllerOptions, prometheuscontroller.WithRemoteWrite())
+		promAgentControllerOptions = append(promAgentControllerOptions, prometheusagentcontroller.WithRemoteWrite())
+	}
+
 	// EndpointSlice v1 became available with Kubernetes v1.21.0.
 	endpointSliceSupported := cfg.KubernetesVersion.GTE(semver.MustParse("1.21.0"))
 	logger.Info("Kubernetes API capabilities", "endpointslices", endpointSliceSupported)
