@@ -2737,7 +2737,8 @@ func (cg *ConfigGenerator) appendRemoteWriteConfigs(
 		remoteWriteConfigs = append(remoteWriteConfigs, cg.generateRemoteWriteConfig(fmt.Sprint(i), spec, s))
 	}
 
-	for identifier, rw := range rws {
+	for _, identifier := range util.SortedKeys(rws) {
+		rw := rws[identifier]
 		remoteWriteConfigs = append(remoteWriteConfigs, cg.WithKeyVals("remote_write", identifier).generateRemoteWriteConfig(identifier, rw.Spec, store.ForNamespace(rw.Namespace)))
 	}
 

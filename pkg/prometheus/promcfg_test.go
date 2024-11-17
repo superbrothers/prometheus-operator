@@ -11974,6 +11974,262 @@ func TestScrapeClassAttachMetadata(t *testing.T) {
 	}
 }
 
+func TestRemoteWrite(t *testing.T) {
+	for _, tc := range []struct {
+		name                string
+		rws                 map[string]*monitoringv1alpha1.RemoteWrite
+		promSpecRemoteWrite []monitoringv1.RemoteWriteSpec
+		goldenFile          string
+	}{
+		{
+			name:       "empty",
+			goldenFile: "RemoteWrite_Empty.golden",
+		},
+		{
+			name: "single",
+			rws: map[string]*monitoringv1alpha1.RemoteWrite{
+				"rw1": {
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "testrw1",
+						Namespace: "default",
+					},
+					Spec: monitoringv1.RemoteWriteSpec{
+						URL: "http://example.com",
+						QueueConfig: &monitoringv1.QueueConfig{
+							Capacity:          1000,
+							MinShards:         1,
+							MaxShards:         10,
+							MaxSamplesPerSend: 100,
+							BatchSendDeadline: ptr.To(monitoringv1.Duration("20s")),
+							MaxRetries:        3,
+							MinBackoff:        ptr.To(monitoringv1.Duration("1s")),
+							MaxBackoff:        ptr.To(monitoringv1.Duration("10s")),
+						},
+						MetadataConfig: &monitoringv1.MetadataConfig{
+							Send:         false,
+							SendInterval: "1m",
+						},
+					},
+				},
+			},
+			goldenFile: "RemoteWrite_Single.golden",
+		},
+		{
+			name: "single with Prom RemoteWrite Config",
+			rws: map[string]*monitoringv1alpha1.RemoteWrite{
+				"rw1": {
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "testrw1",
+						Namespace: "default",
+					},
+					Spec: monitoringv1.RemoteWriteSpec{
+						URL: "http://example.com",
+					},
+				},
+			},
+			promSpecRemoteWrite: []monitoringv1.RemoteWriteSpec{
+				{
+					URL: "http://example2.com",
+				},
+			},
+			goldenFile: "RemoteWrite_SingleWithPromRemoteWriteConfig.golden",
+		},
+		{
+			name: "multiple",
+			rws: map[string]*monitoringv1alpha1.RemoteWrite{
+				"rw1": {
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "testrw1",
+						Namespace: "default",
+					},
+					Spec: monitoringv1.RemoteWriteSpec{
+						URL: "http://example.com",
+						QueueConfig: &monitoringv1.QueueConfig{
+							Capacity:          1000,
+							MinShards:         1,
+							MaxShards:         10,
+							MaxSamplesPerSend: 100,
+							BatchSendDeadline: ptr.To(monitoringv1.Duration("20s")),
+							MaxRetries:        3,
+							MinBackoff:        ptr.To(monitoringv1.Duration("1s")),
+							MaxBackoff:        ptr.To(monitoringv1.Duration("10s")),
+						},
+						MetadataConfig: &monitoringv1.MetadataConfig{
+							Send:         false,
+							SendInterval: "1m",
+						},
+					},
+				},
+				"rw2": {
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "testrw2",
+						Namespace: "default",
+					},
+					Spec: monitoringv1.RemoteWriteSpec{
+						URL: "http://example2.com",
+					},
+				},
+			},
+			goldenFile: "RemoteWrite_Multiple.golden",
+		},
+		{
+			name: "oauth2",
+			rws: map[string]*monitoringv1alpha1.RemoteWrite{
+				"rw1": {
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "testrw1",
+						Namespace: "testrw1",
+					},
+					Spec: monitoringv1.RemoteWriteSpec{
+						URL: "http://example.com",
+						OAuth2: &monitoringv1.OAuth2{
+							ClientID: monitoringv1.SecretOrConfigMap{
+								ConfigMap: &v1.ConfigMapKeySelector{
+									LocalObjectReference: v1.LocalObjectReference{
+										Name: "oauth2",
+									},
+									Key: "client_id",
+								},
+							},
+							ClientSecret: v1.SecretKeySelector{
+								LocalObjectReference: v1.LocalObjectReference{
+									Name: "oauth2",
+								},
+								Key: "client_secret",
+							},
+							TokenURL:       "http://token-url",
+							Scopes:         []string{"scope1"},
+							EndpointParams: map[string]string{"param": "value"},
+						},
+					},
+				},
+			},
+			goldenFile: "RemoteWrite_OAuth2.golden",
+		},
+		{
+			name: "oauth2 with Prom RemoteWriteConfig",
+			rws: map[string]*monitoringv1alpha1.RemoteWrite{
+				"rw1": {
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "testrw1",
+						Namespace: "testrw1",
+					},
+					Spec: monitoringv1.RemoteWriteSpec{
+						URL: "http://example.com",
+						OAuth2: &monitoringv1.OAuth2{
+							ClientID: monitoringv1.SecretOrConfigMap{
+								ConfigMap: &v1.ConfigMapKeySelector{
+									LocalObjectReference: v1.LocalObjectReference{
+										Name: "oauth2",
+									},
+									Key: "client_id",
+								},
+							},
+							ClientSecret: v1.SecretKeySelector{
+								LocalObjectReference: v1.LocalObjectReference{
+									Name: "oauth2",
+								},
+								Key: "client_secret",
+							},
+							TokenURL:       "http://token-url",
+							Scopes:         []string{"scope1"},
+							EndpointParams: map[string]string{"param": "value"},
+						},
+					},
+				},
+			},
+			promSpecRemoteWrite: []monitoringv1.RemoteWriteSpec{
+				{
+					URL: "http://example2.com",
+					OAuth2: &monitoringv1.OAuth2{
+						ClientID: monitoringv1.SecretOrConfigMap{
+							ConfigMap: &v1.ConfigMapKeySelector{
+								LocalObjectReference: v1.LocalObjectReference{
+									Name: "oauth2",
+								},
+								Key: "client_id2",
+							},
+						},
+						ClientSecret: v1.SecretKeySelector{
+							LocalObjectReference: v1.LocalObjectReference{
+								Name: "oauth2",
+							},
+							Key: "client_secret2",
+						},
+						TokenURL:       "http://token-url",
+						Scopes:         []string{"scope1"},
+						EndpointParams: map[string]string{"param": "value"},
+					},
+				},
+			},
+			goldenFile: "RemoteWrite_OAuth2WithPromRemoteWriteConfig.golden",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			p := defaultPrometheus()
+			if tc.promSpecRemoteWrite != nil {
+				p.Spec.CommonPrometheusFields.RemoteWrite = tc.promSpecRemoteWrite
+			}
+
+			store := assets.NewTestStoreBuilder(
+				&v1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "oauth2",
+						Namespace: "testrw1",
+					},
+					Data: map[string]string{
+						"client_id": "client-id",
+					},
+				},
+				&v1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "oauth2",
+						Namespace: "testrw1",
+					},
+					Data: map[string][]byte{
+						"client_secret": []byte("client-secret"),
+					},
+				},
+				&v1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "oauth2",
+						Namespace: "default",
+					},
+					Data: map[string]string{
+						"client_id2": "client-id2",
+					},
+				},
+				&v1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "oauth2",
+						Namespace: "default",
+					},
+					Data: map[string][]byte{
+						"client_secret2": []byte("client-secret2"),
+					},
+				},
+			)
+
+			cg := mustNewConfigGenerator(t, p)
+			cfg, err := cg.GenerateServerConfiguration(
+				p,
+				nil,
+				nil,
+				nil,
+				nil,
+				tc.rws,
+				store,
+				nil,
+				nil,
+				nil,
+				nil,
+			)
+			require.NoError(t, err)
+			golden.Assert(t, string(cfg), tc.goldenFile)
+		})
+	}
+}
+
 func TestGenerateAlertmanagerConfig(t *testing.T) {
 	for _, tc := range []struct {
 		alerting *monitoringv1.AlertingSpec
