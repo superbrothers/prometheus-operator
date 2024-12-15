@@ -1660,42 +1660,7 @@ func (rs *ResourceSelector) SelectRemoteWrites(ctx context.Context, listFn ListA
 			rs.eventRecorder.Eventf(sc, v1.EventTypeWarning, operator.InvalidConfigurationEvent, "RemoteWrite %s was rejected due to invalid configuration: %v", rw.GetName(), err)
 		}
 
-		if err = rs.ValidateRelabelConfigs(rw.Spec.WriteRelabelConfigs); err != nil {
-			rejectFn(rw, fmt.Errorf("writeRelabelConfigs: %w", err))
-			continue
-		}
-
-		if err = rs.store.AddOAuth2(ctx, rw.GetNamespace(), rw.Spec.OAuth2); err != nil {
-			rejectFn(rw, err)
-			continue
-		}
-
-		if err = rs.store.AddBasicAuth(ctx, rw.GetNamespace(), rw.Spec.BasicAuth); err != nil {
-			rejectFn(rw, err)
-			continue
-		}
-
-		if err = rs.store.AddAuthorizationCredentials(ctx, rw.GetNamespace(), rw.Spec.Authorization); err != nil {
-			rejectFn(rw, err)
-			continue
-		}
-
-		if err = rs.store.AddSigV4(ctx, rw.GetNamespace(), rw.Spec.Sigv4); err != nil {
-			rejectFn(rw, err)
-			continue
-		}
-
-		if err = rs.store.AddAzureOAuth(ctx, rw.GetNamespace(), rw.Spec.AzureAD); err != nil {
-			rejectFn(rw, err)
-			continue
-		}
-
-		if err = rs.store.AddTLSConfig(ctx, rw.GetNamespace(), rw.Spec.TLSConfig); err != nil {
-			rejectFn(rw, err)
-			continue
-		}
-
-		if err = addProxyConfigToStore(ctx, rw.Spec.ProxyConfig, rs.store, rw.GetNamespace()); err != nil {
+		if err = AddRemoteWritesToStore(ctx, rs.store, rw.GetNamespace(), []monitoringv1.RemoteWriteSpec{rw.Spec}); err != nil {
 			rejectFn(rw, err)
 			continue
 		}
