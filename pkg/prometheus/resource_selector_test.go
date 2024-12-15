@@ -4237,7 +4237,7 @@ func TestSelectRemoteWrites(t *testing.T) {
 			selected: true,
 		},
 		{
-			scenario: "With OAuth2 ans SigV4",
+			scenario: "With OAuth2 and SigV4",
 			updateSpec: func(rw *monitoringv1.RemoteWriteSpec) {
 				rw.OAuth2 = &monitoringv1.OAuth2{
 					ClientID: monitoringv1.SecretOrConfigMap{
