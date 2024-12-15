@@ -74,6 +74,7 @@ type Operator struct {
 	pmonInfs  *informers.ForResource
 	probeInfs *informers.ForResource
 	sconInfs  *informers.ForResource
+	rwInfs    *informers.ForResource
 	cmapInfs  *informers.ForResource
 	secrInfs  *informers.ForResource
 	ssetInfs  *informers.ForResource
@@ -88,6 +89,7 @@ type Operator struct {
 
 	endpointSliceSupported bool // Whether the Kubernetes API suports the EndpointSlice kind.
 	scrapeConfigSupported  bool
+	remoteWriteSupported   bool
 	canReadStorageClass    bool
 
 	eventRecorder record.EventRecorder
@@ -110,6 +112,13 @@ func WithEndpointSlice() ControllerOption {
 func WithScrapeConfig() ControllerOption {
 	return func(o *Operator) {
 		o.scrapeConfigSupported = true
+	}
+}
+
+// WithRemoteWrite tells that the controller manages RemoteWrite objects.
+func WithRemoteWrite() ControllerOption {
+	return func(o *Operator) {
+		o.remoteWriteSupported = true
 	}
 }
 
@@ -255,6 +264,22 @@ func New(ctx context.Context, restConfig *rest.Config, c operator.Config, logger
 		)
 		if err != nil {
 			return nil, fmt.Errorf("error creating scrapeconfig informers: %w", err)
+		}
+	}
+
+	if o.remoteWriteSupported {
+		o.rwInfs, err = informers.NewInformersForResource(
+			informers.NewMonitoringInformerFactories(
+				c.Namespaces.AllowList,
+				c.Namespaces.DenyList,
+				mclient,
+				resyncPeriod,
+				nil,
+			),
+			monitoringv1alpha1.SchemeGroupVersion.WithResource(monitoringv1alpha1.RemoteWriteName),
+		)
+		if err != nil {
+			return nil, fmt.Errorf("error creating remotewrites informers: %w", err)
 		}
 	}
 
@@ -875,6 +900,14 @@ func (c *Operator) createOrUpdateConfigurationSecret(ctx context.Context, p *mon
 		}
 	}
 
+	var rws map[string]*monitoringv1alpha1.RemoteWrite
+	if c.rwInfs != nil {
+		rws, err = resourceSelector.SelectRemoteWrites(ctx, c.rwInfs.ListAllByNamespace)
+		if err != nil {
+			return fmt.Errorf("selecting RemoteWrites failed: %w", err)
+		}
+	}
+
 	if err := prompkg.AddRemoteWritesToStore(ctx, store, p.GetNamespace(), p.Spec.RemoteWrite); err != nil {
 		return err
 	}
@@ -899,6 +932,7 @@ func (c *Operator) createOrUpdateConfigurationSecret(ctx context.Context, p *mon
 		pmons,
 		bmons,
 		scrapeConfigs,
+		rws,
 		store,
 		additionalScrapeConfigs,
 	)

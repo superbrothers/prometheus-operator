@@ -4183,3 +4183,167 @@ func TestSelectScrapeConfigs(t *testing.T) {
 		})
 	}
 }
+
+func TestSelectRemoteWrites(t *testing.T) {
+	for _, tc := range []struct {
+		scenario   string
+		updateSpec func(*monitoringv1.RemoteWriteSpec)
+		selected   bool
+	}{
+		{
+			scenario: "With OAuth2",
+			updateSpec: func(rw *monitoringv1.RemoteWriteSpec) {
+				rw.OAuth2 = &monitoringv1.OAuth2{
+					ClientID: monitoringv1.SecretOrConfigMap{
+						ConfigMap: &v1.ConfigMapKeySelector{
+							LocalObjectReference: v1.LocalObjectReference{
+								Name: "oauth2",
+							},
+							Key: "key1",
+						},
+					},
+					ClientSecret: v1.SecretKeySelector{
+						LocalObjectReference: v1.LocalObjectReference{
+							Name: "oauth2",
+						},
+						Key: "key1",
+					},
+					TokenURL: "http://token-url",
+				}
+			},
+			selected: true,
+		},
+		{
+			scenario: "With SigV4",
+			updateSpec: func(rw *monitoringv1.RemoteWriteSpec) {
+				rw.Sigv4 = &monitoringv1.Sigv4{
+					Profile: "profilename",
+					RoleArn: "arn:aws:iam::123456789012:instance-profile/prometheus",
+					AccessKey: &v1.SecretKeySelector{
+						LocalObjectReference: v1.LocalObjectReference{
+							Name: "sigv4",
+						},
+						Key: "key1",
+					},
+					SecretKey: &v1.SecretKeySelector{
+						LocalObjectReference: v1.LocalObjectReference{
+							Name: "sigv4",
+						},
+						Key: "key1",
+					},
+					Region: "us-central-0",
+				}
+			},
+			selected: true,
+		},
+		{
+			scenario: "With OAuth2 and SigV4",
+			updateSpec: func(rw *monitoringv1.RemoteWriteSpec) {
+				rw.OAuth2 = &monitoringv1.OAuth2{
+					ClientID: monitoringv1.SecretOrConfigMap{
+						ConfigMap: &v1.ConfigMapKeySelector{
+							LocalObjectReference: v1.LocalObjectReference{
+								Name: "oauth2",
+							},
+							Key: "key1",
+						},
+					},
+					ClientSecret: v1.SecretKeySelector{
+						LocalObjectReference: v1.LocalObjectReference{
+							Name: "oauth2",
+						},
+						Key: "key1",
+					},
+					TokenURL: "http://token-url",
+				}
+				rw.Sigv4 = &monitoringv1.Sigv4{
+					Profile: "profilename",
+					RoleArn: "arn:aws:iam::123456789012:instance-profile/prometheus",
+					AccessKey: &v1.SecretKeySelector{
+						LocalObjectReference: v1.LocalObjectReference{
+							Name: "sigv4",
+						},
+						Key: "key1",
+					},
+					SecretKey: &v1.SecretKeySelector{
+						LocalObjectReference: v1.LocalObjectReference{
+							Name: "sigv4",
+						},
+						Key: "key2",
+					},
+					Region: "us-central-0",
+				}
+			},
+			selected: false,
+		},
+	} {
+		t.Run(tc.scenario, func(t *testing.T) {
+			cs := fake.NewSimpleClientset(
+				&v1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "oauth2",
+						Namespace: "test",
+					},
+					Data: map[string]string{
+						"key1": "val1",
+					},
+				},
+				&v1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "oauth2",
+						Namespace: "test",
+					},
+					Data: map[string][]byte{
+						"key1": []byte("val1"),
+					},
+				},
+				&v1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "sigv4",
+						Namespace: "test",
+					},
+					Data: map[string][]byte{
+						"key1": []byte("val1"),
+						"key2": []byte("val2"),
+					},
+				},
+			)
+
+			rs, err := NewResourceSelector(
+				newLogger(),
+				&monitoringv1.Prometheus{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "test",
+						Namespace: "test",
+					},
+				},
+				assets.NewStoreBuilder(cs.CoreV1(), cs.CoreV1()),
+				nil,
+				operator.NewMetrics(prometheus.NewPedanticRegistry()),
+				record.NewFakeRecorder(1),
+			)
+			require.NoError(t, err)
+
+			rw := &monitoringv1alpha1.RemoteWrite{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test",
+					Namespace: "test",
+				},
+			}
+
+			tc.updateSpec(&rw.Spec)
+
+			rws, err := rs.SelectRemoteWrites(context.Background(), func(_ string, _ labels.Selector, appendFn cache.AppendFunc) error {
+				appendFn(rw)
+				return nil
+			})
+
+			require.NoError(t, err)
+			if tc.selected {
+				require.Len(t, rws, 1)
+			} else {
+				require.Empty(t, rws)
+			}
+		})
+	}
+}

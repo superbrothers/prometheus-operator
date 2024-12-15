@@ -337,6 +337,7 @@ func TestGlobalSettings(t *testing.T) {
 				nil,
 				nil,
 				nil,
+				nil,
 				&assets.StoreBuilder{},
 				nil,
 				nil,
@@ -562,6 +563,7 @@ func TestProbeStaticTargetsConfigGenerationWithLabelEnforce(t *testing.T) {
 			},
 		},
 		nil,
+		nil,
 		&assets.StoreBuilder{},
 		nil,
 		nil,
@@ -609,6 +611,7 @@ func TestProbeStaticTargetsConfigGenerationWithJobName(t *testing.T) {
 			},
 		},
 		nil,
+		nil,
 		&assets.StoreBuilder{},
 		nil,
 		nil,
@@ -654,6 +657,7 @@ func TestProbeStaticTargetsConfigGenerationWithoutModule(t *testing.T) {
 				},
 			},
 		},
+		nil,
 		nil,
 		&assets.StoreBuilder{},
 		nil,
@@ -711,6 +715,7 @@ func TestProbeIngressSDConfigGeneration(t *testing.T) {
 				},
 			},
 		},
+		nil,
 		nil,
 		&assets.StoreBuilder{},
 		nil,
@@ -771,6 +776,7 @@ func TestProbeIngressSDConfigGenerationWithShards(t *testing.T) {
 			},
 		},
 		nil,
+		nil,
 		&assets.StoreBuilder{},
 		nil,
 		nil,
@@ -828,6 +834,7 @@ func TestProbeIngressSDConfigGenerationWithLabelEnforce(t *testing.T) {
 				},
 			},
 		},
+		nil,
 		nil,
 		&assets.StoreBuilder{},
 		nil,
@@ -997,6 +1004,7 @@ func TestAlertmanagerBearerToken(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		nil,
 		&assets.StoreBuilder{},
 		nil,
 		nil,
@@ -1066,6 +1074,7 @@ func TestAlertmanagerBasicAuth(t *testing.T) {
 
 		cfg, err := cg.GenerateServerConfiguration(
 			p,
+			nil,
 			nil,
 			nil,
 			nil,
@@ -1142,6 +1151,7 @@ func TestAlertmanagerSigv4(t *testing.T) {
 		cg := mustNewConfigGenerator(t, p)
 		cfg, err := cg.GenerateServerConfiguration(
 			p,
+			nil,
 			nil,
 			nil,
 			nil,
@@ -1281,6 +1291,7 @@ func TestAlertmanagerAPIVersion(t *testing.T) {
 				nil,
 				nil,
 				nil,
+				nil,
 				&assets.StoreBuilder{},
 				nil,
 				nil,
@@ -1310,6 +1321,7 @@ func TestAlertmanagerTimeoutConfig(t *testing.T) {
 	cg := mustNewConfigGenerator(t, p)
 	cfg, err := cg.GenerateServerConfiguration(
 		p,
+		nil,
 		nil,
 		nil,
 		nil,
@@ -1372,6 +1384,7 @@ func TestAlertmanagerEnableHttp2(t *testing.T) {
 				nil,
 				nil,
 				nil,
+				nil,
 				&assets.StoreBuilder{},
 				nil,
 				nil,
@@ -1419,6 +1432,7 @@ func TestAlertmanagerRelabelConfigs(t *testing.T) {
 		cg := mustNewConfigGenerator(t, p)
 		cfg, err := cg.GenerateServerConfiguration(
 			p,
+			nil,
 			nil,
 			nil,
 			nil,
@@ -1478,6 +1492,7 @@ func TestAlertmanagerAlertRelabelConfigs(t *testing.T) {
 				nil,
 				nil,
 				nil,
+				nil,
 				&assets.StoreBuilder{},
 				nil,
 				nil,
@@ -1498,6 +1513,7 @@ func TestAdditionalScrapeConfigs(t *testing.T) {
 		cg := mustNewConfigGenerator(t, p)
 		cfg, err := cg.GenerateServerConfiguration(
 			p,
+			nil,
 			nil,
 			nil,
 			nil,
@@ -1561,6 +1577,7 @@ func TestAdditionalAlertRelabelConfigs(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		nil,
 		&assets.StoreBuilder{},
 		nil,
 		golden.Get(t, "AdditionalAlertRelabelConfigs.golden"),
@@ -1620,6 +1637,7 @@ func TestNoEnforcedNamespaceLabelServiceMonitor(t *testing.T) {
 				},
 			},
 		},
+		nil,
 		nil,
 		nil,
 		nil,
@@ -1689,6 +1707,7 @@ func TestServiceMonitorWithEndpointSliceEnable(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		nil,
 		&assets.StoreBuilder{},
 		nil,
 		nil,
@@ -1743,6 +1762,7 @@ func TestEnforcedNamespaceLabelPodMonitor(t *testing.T) {
 				},
 			},
 		},
+		nil,
 		nil,
 		nil,
 		&assets.StoreBuilder{},
@@ -1812,6 +1832,7 @@ func TestEnforcedNamespaceLabelOnExcludedPodMonitor(t *testing.T) {
 		},
 		nil,
 		nil,
+		nil,
 		&assets.StoreBuilder{},
 		nil,
 		nil,
@@ -1873,6 +1894,7 @@ func TestEnforcedNamespaceLabelServiceMonitor(t *testing.T) {
 				},
 			},
 		},
+		nil,
 		nil,
 		nil,
 		nil,
@@ -1947,6 +1969,7 @@ func TestEnforcedNamespaceLabelOnExcludedServiceMonitor(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		nil,
 		&assets.StoreBuilder{},
 		nil,
 		nil,
@@ -1973,6 +1996,7 @@ func TestAdditionalAlertmanagers(t *testing.T) {
 
 	cfg, err := cg.GenerateServerConfiguration(
 		p,
+		nil,
 		nil,
 		nil,
 		nil,
@@ -2017,6 +2041,7 @@ func TestSettingHonorTimestampsInServiceMonitor(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		nil,
 		&assets.StoreBuilder{},
 		nil,
 		nil,
@@ -2052,6 +2077,7 @@ func TestSettingHonorTimestampsInPodMonitor(t *testing.T) {
 				},
 			},
 		},
+		nil,
 		nil,
 		nil,
 		&assets.StoreBuilder{},
@@ -2091,6 +2117,7 @@ func TestSettingTrackTimestampsStalenessInServiceMonitor(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		nil,
 		&assets.StoreBuilder{},
 		nil,
 		nil,
@@ -2126,6 +2153,7 @@ func TestSettingTrackTimestampsStalenessInPodMonitor(t *testing.T) {
 				},
 			},
 		},
+		nil,
 		nil,
 		nil,
 		&assets.StoreBuilder{},
@@ -2193,6 +2221,7 @@ func TestSettingScrapeProtocolsInServiceMonitor(t *testing.T) {
 				nil,
 				nil,
 				nil,
+				nil,
 				&assets.StoreBuilder{},
 				nil,
 				nil,
@@ -2251,6 +2280,7 @@ func TestSettingScrapeFallbackProtocolInServiceMonitor(t *testing.T) {
 						},
 					},
 				},
+				nil,
 				nil,
 				nil,
 				nil,
@@ -2321,6 +2351,7 @@ func TestSettingScrapeProtocolsInPodMonitor(t *testing.T) {
 				},
 				nil,
 				nil,
+				nil,
 				&assets.StoreBuilder{},
 				nil,
 				nil,
@@ -2382,6 +2413,7 @@ func TestSettingScrapeFallbackProtocolInPodMonitor(t *testing.T) {
 				},
 				nil,
 				nil,
+				nil,
 				&assets.StoreBuilder{},
 				nil,
 				nil,
@@ -2422,6 +2454,7 @@ func TestHonorTimestampsOverriding(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		nil,
 		&assets.StoreBuilder{},
 		nil,
 		nil,
@@ -2459,6 +2492,7 @@ func TestSettingHonorLabels(t *testing.T) {
 				},
 			},
 		},
+		nil,
 		nil,
 		nil,
 		nil,
@@ -2503,6 +2537,7 @@ func TestHonorLabelsOverriding(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		nil,
 		&assets.StoreBuilder{},
 		nil,
 		nil,
@@ -2536,6 +2571,7 @@ func TestTargetLabels(t *testing.T) {
 				},
 			},
 		},
+		nil,
 		nil,
 		nil,
 		nil,
@@ -2732,6 +2768,7 @@ func TestEndpointOAuth2(t *testing.T) {
 				tt.pMons,
 				tt.probes,
 				nil,
+				nil,
 				s,
 				nil,
 				nil,
@@ -2770,6 +2807,7 @@ func TestPodTargetLabels(t *testing.T) {
 				},
 			},
 		},
+		nil,
 		nil,
 		nil,
 		nil,
@@ -2812,6 +2850,7 @@ func TestPodTargetLabelsFromPodMonitor(t *testing.T) {
 		},
 		nil,
 		nil,
+		nil,
 		&assets.StoreBuilder{},
 		nil,
 		nil,
@@ -2852,6 +2891,7 @@ func TestPodTargetLabelsFromPodMonitorAndGlobal(t *testing.T) {
 		},
 		nil,
 		nil,
+		nil,
 		&assets.StoreBuilder{},
 		nil,
 		nil,
@@ -2887,6 +2927,7 @@ func TestEmptyEndpointPorts(t *testing.T) {
 				},
 			},
 		},
+		nil,
 		nil,
 		nil,
 		nil,
@@ -2959,6 +3000,7 @@ func generateTestConfig(t *testing.T, version string) ([]byte, error) {
 		p,
 		makeServiceMonitors(),
 		makePodMonitors(),
+		nil,
 		nil,
 		nil,
 		&assets.StoreBuilder{},
@@ -3533,6 +3575,7 @@ func TestSampleLimits(t *testing.T) {
 				nil,
 				nil,
 				nil,
+				nil,
 				&assets.StoreBuilder{},
 				nil,
 				nil,
@@ -3639,6 +3682,7 @@ func TestTargetLimits(t *testing.T) {
 				map[string]*monitoringv1.ServiceMonitor{
 					"testservicemonitor1": &serviceMonitor,
 				},
+				nil,
 				nil,
 				nil,
 				nil,
@@ -3848,6 +3892,7 @@ func TestRemoteReadConfig(t *testing.T) {
 			cg := mustNewConfigGenerator(t, p)
 			cfg, err := cg.GenerateServerConfiguration(
 				p,
+				nil,
 				nil,
 				nil,
 				nil,
@@ -4390,6 +4435,7 @@ func TestRemoteWriteConfig(t *testing.T) {
 				nil,
 				nil,
 				nil,
+				nil,
 				store,
 				nil,
 				nil,
@@ -4505,6 +4551,7 @@ func TestLabelLimits(t *testing.T) {
 				nil,
 				nil,
 				nil,
+				nil,
 				&assets.StoreBuilder{},
 				nil,
 				nil,
@@ -4610,6 +4657,7 @@ func TestLabelNameLengthLimits(t *testing.T) {
 				map[string]*monitoringv1.PodMonitor{
 					"testpodmonitor1": &podMonitor,
 				},
+				nil,
 				nil,
 				nil,
 				&assets.StoreBuilder{},
@@ -4731,6 +4779,7 @@ func TestLabelValueLengthLimits(t *testing.T) {
 					"testprobe1": &probe,
 				},
 				nil,
+				nil,
 				&assets.StoreBuilder{},
 				nil,
 				nil,
@@ -4801,6 +4850,7 @@ func TestKeepDroppedTargets(t *testing.T) {
 				map[string]*monitoringv1.ServiceMonitor{
 					"testservicemonitor1": &serviceMonitor,
 				},
+				nil,
 				nil,
 				nil,
 				nil,
@@ -4892,6 +4942,7 @@ func TestNativeHistogramConfig(t *testing.T) {
 				nil,
 				nil,
 				nil,
+				nil,
 				&assets.StoreBuilder{},
 				nil,
 				nil,
@@ -4971,6 +5022,7 @@ func TestBodySizeLimits(t *testing.T) {
 				nil,
 				nil,
 				nil,
+				nil,
 				&assets.StoreBuilder{},
 				nil,
 				nil,
@@ -5020,6 +5072,7 @@ func TestMatchExpressionsServiceMonitor(t *testing.T) {
 				},
 			},
 		},
+		nil,
 		nil,
 		nil,
 		nil,
@@ -5091,6 +5144,7 @@ func TestServiceMonitorEndpointFollowRedirects(t *testing.T) {
 				map[string]*monitoringv1.ServiceMonitor{
 					"testservicemonitor1": &serviceMonitor,
 				},
+				nil,
 				nil,
 				nil,
 				nil,
@@ -5166,6 +5220,7 @@ func TestPodMonitorEndpointFollowRedirects(t *testing.T) {
 				},
 				nil,
 				nil,
+				nil,
 				&assets.StoreBuilder{},
 				nil,
 				nil,
@@ -5237,6 +5292,7 @@ func TestServiceMonitorEndpointEnableHttp2(t *testing.T) {
 				nil,
 				nil,
 				nil,
+				nil,
 				&assets.StoreBuilder{},
 				nil,
 				nil,
@@ -5275,6 +5331,7 @@ func TestPodMonitorPhaseFilter(t *testing.T) {
 				},
 			},
 		},
+		nil,
 		nil,
 		nil,
 		&assets.StoreBuilder{},
@@ -5346,6 +5403,7 @@ func TestPodMonitorEndpointEnableHttp2(t *testing.T) {
 				},
 				nil,
 				nil,
+				nil,
 				&assets.StoreBuilder{},
 				nil,
 				nil,
@@ -5395,6 +5453,7 @@ func TestRuntimeConfig(t *testing.T) {
 			cg := mustNewConfigGenerator(t, p)
 			cfg, err := cg.GenerateServerConfiguration(
 				p,
+				nil,
 				nil,
 				nil,
 				nil,
@@ -5450,6 +5509,7 @@ func TestStorageSettingMaxExemplars(t *testing.T) {
 
 			cfg, err := cg.GenerateServerConfiguration(
 				p,
+				nil,
 				nil,
 				nil,
 				nil,
@@ -5511,6 +5571,7 @@ func TestTSDBConfig(t *testing.T) {
 				nil,
 				nil,
 				nil,
+				nil,
 				&assets.StoreBuilder{},
 				nil,
 				nil,
@@ -5568,6 +5629,7 @@ func TestTSDBConfigPrometheusAgent(t *testing.T) {
 				nil,
 				nil,
 				nil,
+				nil,
 				&assets.StoreBuilder{},
 				nil,
 			)
@@ -5587,6 +5649,7 @@ func TestPromAgentDaemonSetPodMonitorConfig(t *testing.T) {
 	cfg, err := cg.GenerateAgentConfiguration(
 		nil,
 		pmons,
+		nil,
 		nil,
 		nil,
 		&assets.StoreBuilder{},
@@ -5661,6 +5724,7 @@ func TestGenerateRelabelConfig(t *testing.T) {
 				},
 			},
 		},
+		nil,
 		nil,
 		nil,
 		nil,
@@ -5761,6 +5825,7 @@ func TestProbeSpecConfig(t *testing.T) {
 				nil,
 				nil,
 				pbs,
+				nil,
 				nil,
 				&assets.StoreBuilder{},
 				nil,
@@ -6441,6 +6506,7 @@ func TestScrapeConfigSpecConfig(t *testing.T) {
 				nil,
 				nil,
 				scs,
+				nil,
 				store,
 				nil,
 				nil,
@@ -6651,6 +6717,7 @@ func TestScrapeConfigSpecConfigWithHTTPSD(t *testing.T) {
 				nil,
 				nil,
 				scs,
+				nil,
 				store,
 				nil,
 				nil,
@@ -6956,6 +7023,7 @@ func TestScrapeConfigSpecConfigWithKubernetesSD(t *testing.T) {
 				nil,
 				nil,
 				scs,
+				nil,
 				store,
 				nil,
 				nil,
@@ -7264,6 +7332,7 @@ func TestScrapeConfigSpecConfigWithConsulSD(t *testing.T) {
 				nil,
 				nil,
 				scs,
+				nil,
 				store,
 				nil,
 				nil,
@@ -7540,6 +7609,7 @@ func TestScrapeConfigSpecConfigWithEC2SD(t *testing.T) {
 				nil,
 				nil,
 				scs,
+				nil,
 				assets.NewTestStoreBuilder(sec),
 				nil,
 				nil,
@@ -7639,6 +7709,7 @@ func TestScrapeConfigSpecConfigWithAzureSD(t *testing.T) {
 				nil,
 				nil,
 				scs,
+				nil,
 				assets.NewTestStoreBuilder(sec),
 				nil,
 				nil,
@@ -7703,6 +7774,7 @@ func TestScrapeConfigSpecConfigWithGCESD(t *testing.T) {
 				nil,
 				nil,
 				scs,
+				nil,
 				assets.NewTestStoreBuilder(),
 				nil,
 				nil,
@@ -7804,6 +7876,7 @@ func TestScrapeConfigSpecConfigWithOpenStackSD(t *testing.T) {
 				nil,
 				nil,
 				scs,
+				nil,
 				assets.NewTestStoreBuilder(sec),
 				nil,
 				nil,
@@ -7991,6 +8064,7 @@ func TestScrapeConfigSpecConfigWithDigitalOceanSD(t *testing.T) {
 				nil,
 				nil,
 				scs,
+				nil,
 				store,
 				nil,
 				nil,
@@ -8368,6 +8442,7 @@ func TestScrapeConfigSpecConfigWithDockerSDConfig(t *testing.T) {
 				nil,
 				nil,
 				scs,
+				nil,
 				store,
 				nil,
 				nil,
@@ -8559,6 +8634,7 @@ func TestScrapeConfigSpecConfigWithLinodeSDConfig(t *testing.T) {
 				nil,
 				nil,
 				scs,
+				nil,
 				store,
 				nil,
 				nil,
@@ -8768,6 +8844,7 @@ func TestScrapeConfigSpecConfigWithHetznerSD(t *testing.T) {
 				nil,
 				nil,
 				scs,
+				nil,
 				store,
 				nil,
 				nil,
@@ -8826,6 +8903,7 @@ func TestAppendNameValidationScheme(t *testing.T) {
 			cg := mustNewConfigGenerator(t, p)
 			cfg, err := cg.GenerateServerConfiguration(
 				p,
+				nil,
 				nil,
 				nil,
 				nil,
@@ -8939,6 +9017,7 @@ func TestOTLPConfig(t *testing.T) {
 				nil,
 				nil,
 				nil,
+				nil,
 				store,
 				nil,
 				nil,
@@ -8999,6 +9078,7 @@ func TestTracingConfig(t *testing.T) {
 
 			cfg, err := cg.GenerateServerConfiguration(
 				p,
+				nil,
 				nil,
 				nil,
 				nil,
@@ -9231,6 +9311,7 @@ func TestScrapeConfigSpecConfigWithKumaSD(t *testing.T) {
 				nil,
 				nil,
 				scs,
+				nil,
 				store,
 				nil,
 				nil,
@@ -9423,6 +9504,7 @@ func TestScrapeClass(t *testing.T) {
 				map[string]*monitoringv1.PodMonitor{"monitor": podMonitor},
 				map[string]*monitoringv1.Probe{"monitor": probe},
 				map[string]*monitoringv1alpha1.ScrapeConfig{"monitor": scrapeConfig},
+				nil,
 				&assets.StoreBuilder{},
 				nil,
 				nil,
@@ -9536,6 +9618,7 @@ func TestServiceMonitorScrapeClassWithDefaultTLS(t *testing.T) {
 			nil,
 			nil,
 			nil,
+			nil,
 			&assets.StoreBuilder{},
 			nil,
 			nil,
@@ -9643,6 +9726,7 @@ func TestPodMonitorScrapeClassWithDefaultTLS(t *testing.T) {
 			map[string]*monitoringv1.PodMonitor{"monitor": podMonitor},
 			nil,
 			nil,
+			nil,
 			&assets.StoreBuilder{},
 			nil,
 			nil,
@@ -9702,6 +9786,7 @@ func TestPodMonitorPortNumber(t *testing.T) {
 			p,
 			nil,
 			map[string]*monitoringv1.PodMonitor{"monitor": podMonitor},
+			nil,
 			nil,
 			nil,
 			&assets.StoreBuilder{},
@@ -9986,6 +10071,7 @@ func TestScrapeConfigSpecConfigWithEurekaSD(t *testing.T) {
 				nil,
 				nil,
 				scs,
+				nil,
 				store,
 				nil,
 				nil,
@@ -10169,6 +10255,7 @@ func TestScrapeConfigSpecConfigWithNomadSD(t *testing.T) {
 				nil,
 				nil,
 				scs,
+				nil,
 				store,
 				nil,
 				nil,
@@ -10404,6 +10491,7 @@ func TestScrapeConfigSpecConfigWithDockerswarmSD(t *testing.T) {
 				nil,
 				nil,
 				scs,
+				nil,
 				store,
 				nil,
 				nil,
@@ -10633,6 +10721,7 @@ func TestScrapeConfigSpecConfigWithPuppetDBSD(t *testing.T) {
 				nil,
 				nil,
 				scs,
+				nil,
 				store,
 				nil,
 				nil,
@@ -10915,6 +11004,7 @@ func TestScrapeConfigSpecConfigWithLightSailSD(t *testing.T) {
 				nil,
 				nil,
 				scs,
+				nil,
 				store,
 				nil,
 				nil,
@@ -10993,6 +11083,7 @@ func TestScrapeConfigSpecConfigWithOVHCloudSD(t *testing.T) {
 				nil,
 				nil,
 				scs,
+				nil,
 				store,
 				nil,
 				nil,
@@ -11146,6 +11237,7 @@ func TestScrapeConfigSpecConfigWithScalewaySD(t *testing.T) {
 				nil,
 				nil,
 				scs,
+				nil,
 				store,
 				nil,
 				nil,
@@ -11297,6 +11389,7 @@ func TestScrapeConfigSpecConfigWithIonosSD(t *testing.T) {
 				nil,
 				nil,
 				scs,
+				nil,
 				store,
 				nil,
 				nil,
@@ -11345,6 +11438,7 @@ func TestServiceMonitorWithDefaultScrapeClassRelabelings(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		nil,
 		&assets.StoreBuilder{},
 		nil,
 		nil,
@@ -11376,6 +11470,7 @@ func TestServiceMonitorWithNonDefaultScrapeClassRelabelings(t *testing.T) {
 	cfg, err := cg.GenerateServerConfiguration(
 		p,
 		map[string]*monitoringv1.ServiceMonitor{"monitor": serviceMonitor},
+		nil,
 		nil,
 		nil,
 		nil,
@@ -11425,6 +11520,7 @@ func TestPodMonitorWithDefaultScrapeClassRelabelings(t *testing.T) {
 		map[string]*monitoringv1.PodMonitor{"monitor": podMonitor},
 		nil,
 		nil,
+		nil,
 		&assets.StoreBuilder{},
 		nil,
 		nil,
@@ -11457,6 +11553,7 @@ func TestPodMonitorWithNonDefaultScrapeClassRelabelings(t *testing.T) {
 		p,
 		nil,
 		map[string]*monitoringv1.PodMonitor{"monitor": podMonitor},
+		nil,
 		nil,
 		nil,
 		&assets.StoreBuilder{},
@@ -11597,6 +11694,7 @@ func TestScrapeClassMetricRelabelings(t *testing.T) {
 				tc.podMonitors,
 				tc.probes,
 				tc.scrapeConfigs,
+				nil,
 				&assets.StoreBuilder{},
 				nil,
 				nil,
@@ -11870,6 +11968,7 @@ func TestScrapeClassAuthorization(t *testing.T) {
 				tc.podMonitors,
 				tc.probes,
 				tc.scrapeConfigs,
+				nil,
 				tc.storeBuilder,
 				nil,
 				nil,
@@ -11961,6 +12060,7 @@ func TestScrapeClassAttachMetadata(t *testing.T) {
 				tc.podMonitors,
 				tc.probes,
 				tc.scrapeConfigs,
+				nil,
 				&assets.StoreBuilder{},
 				nil,
 				nil,
@@ -11968,6 +12068,148 @@ func TestScrapeClassAttachMetadata(t *testing.T) {
 				nil,
 			)
 
+			require.NoError(t, err)
+			golden.Assert(t, string(cfg), tc.goldenFile)
+		})
+	}
+}
+
+func TestRemoteWrite(t *testing.T) {
+	for _, tc := range []struct {
+		name                string
+		rws                 map[string]*monitoringv1alpha1.RemoteWrite
+		promSpecRemoteWrite []monitoringv1.RemoteWriteSpec
+		goldenFile          string
+	}{
+		{
+			name:       "empty",
+			goldenFile: "RemoteWrite_empty.golden",
+		},
+		{
+			name: "valid",
+			rws: map[string]*monitoringv1alpha1.RemoteWrite{
+				"rw1": {
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "testrw1",
+						Namespace: "default",
+					},
+					Spec: monitoringv1.RemoteWriteSpec{
+						URL: "http://example.com",
+						QueueConfig: &monitoringv1.QueueConfig{
+							Capacity:          1000,
+							MinShards:         1,
+							MaxShards:         10,
+							MaxSamplesPerSend: 100,
+							BatchSendDeadline: ptr.To(monitoringv1.Duration("20s")),
+							MaxRetries:        3,
+							MinBackoff:        ptr.To(monitoringv1.Duration("1s")),
+							MaxBackoff:        ptr.To(monitoringv1.Duration("10s")),
+						},
+						MetadataConfig: &monitoringv1.MetadataConfig{
+							Send:         false,
+							SendInterval: "1m",
+						},
+					},
+				},
+			},
+			goldenFile: "RemoteWrite_valid.golden",
+		},
+		{
+			name: "with Prom RemoteWrite Config",
+			rws: map[string]*monitoringv1alpha1.RemoteWrite{
+				"rw1": {
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "testrw1",
+						Namespace: "default",
+					},
+					Spec: monitoringv1.RemoteWriteSpec{
+						URL: "http://example.com",
+					},
+				},
+			},
+			promSpecRemoteWrite: []monitoringv1.RemoteWriteSpec{
+				{
+					URL: "http://example2.com",
+				},
+			},
+			goldenFile: "RemoteWrite_with_prom_remotewrite_config.golden",
+		},
+		{
+			name: "oauth2",
+			rws: map[string]*monitoringv1alpha1.RemoteWrite{
+				"rw1": {
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "testrw1",
+						Namespace: "testrw1",
+					},
+					Spec: monitoringv1.RemoteWriteSpec{
+						URL: "http://example.com",
+						OAuth2: &monitoringv1.OAuth2{
+							ClientID: monitoringv1.SecretOrConfigMap{
+								ConfigMap: &v1.ConfigMapKeySelector{
+									LocalObjectReference: v1.LocalObjectReference{
+										Name: "oauth2",
+									},
+									Key: "client_id",
+								},
+							},
+							ClientSecret: v1.SecretKeySelector{
+								LocalObjectReference: v1.LocalObjectReference{
+									Name: "oauth2",
+								},
+								Key: "client_secret",
+							},
+							TokenURL:       "http://token-url",
+							Scopes:         []string{"scope1"},
+							EndpointParams: map[string]string{"param": "value"},
+						},
+					},
+				},
+			},
+			goldenFile: "RemoteWrite_oauth2.golden",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			p := defaultPrometheus()
+			if tc.promSpecRemoteWrite != nil {
+				p.Spec.CommonPrometheusFields.RemoteWrite = tc.promSpecRemoteWrite
+			}
+
+			store := assets.NewTestStoreBuilder(
+				&v1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "oauth2",
+						Namespace: "testrw1",
+					},
+					Data: map[string]string{
+						"client_id": "client-id",
+					},
+				},
+				&v1.Secret{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "oauth2",
+						Namespace: "testrw1",
+					},
+					Data: map[string][]byte{
+						"client_secret": []byte("client-secret"),
+					},
+				},
+			)
+
+			cg := mustNewConfigGenerator(t, p)
+			cfg, err := cg.GenerateServerConfiguration(
+				p,
+				nil,
+				nil,
+				nil,
+				nil,
+				tc.rws,
+				store,
+				nil,
+				nil,
+				nil,
+				nil,
+			)
 			require.NoError(t, err)
 			golden.Assert(t, string(cfg), tc.goldenFile)
 		})
@@ -12131,6 +12373,7 @@ func TestGenerateAlertmanagerConfig(t *testing.T) {
 			cfg, err := cg.GenerateServerConfiguration(
 				p,
 				map[string]*monitoringv1.ServiceMonitor{},
+				nil,
 				nil,
 				nil,
 				nil,
@@ -12351,6 +12594,7 @@ func TestAlertmanagerTLSConfig(t *testing.T) {
 			nil,
 			nil,
 			nil,
+			nil,
 			assets.NewTestStoreBuilder(),
 			nil,
 			nil,
@@ -12505,6 +12749,7 @@ func TestServiceMonitorSelectors(t *testing.T) {
 				nil,
 				nil,
 				nil,
+				nil,
 				assets.NewTestStoreBuilder(),
 				nil,
 				nil,
@@ -12650,6 +12895,7 @@ func TestPodMonitorSelectors(t *testing.T) {
 				p,
 				nil,
 				map[string]*monitoringv1.PodMonitor{"monitor": tc.podMonitor},
+				nil,
 				nil,
 				nil,
 				assets.NewTestStoreBuilder(),

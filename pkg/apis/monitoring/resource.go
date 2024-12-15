@@ -39,6 +39,9 @@ const (
 
 	ScrapeConfigsKind = "ScrapeConfig"
 	ScrapeConfigName  = "scrapeconfigs"
+
+	RemoteWritesKind = "RemoteWrite"
+	RemoteWriteName  = "remotewrites"
 )
 
 var resourceToKindMap = map[string]string{
@@ -49,6 +52,7 @@ var resourceToKindMap = map[string]string{
 	PrometheusRuleName: PrometheusRuleKind,
 	ProbeName:          ProbesKind,
 	ScrapeConfigName:   ScrapeConfigsKind,
+	RemoteWriteName:    RemoteWritesKind,
 }
 
 func ResourceToKind(s string) string {

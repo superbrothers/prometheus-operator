@@ -1596,3 +1596,88 @@ func (rs *ResourceSelector) validateIonosSDConfigs(ctx context.Context, sc *moni
 	}
 	return nil
 }
+
+// SelectRemoteWrites selects RemoteWrites based on the selectors in the Prometheus CR and filters them
+// returning only those with a valid configuration.
+func (rs *ResourceSelector) SelectRemoteWrites(ctx context.Context, listFn ListAllByNamespaceFn) (map[string]*monitoringv1alpha1.RemoteWrite, error) {
+	cpf := rs.p.GetCommonPrometheusFields()
+	objMeta := rs.p.GetObjectMeta()
+	namespaces := []string{}
+
+	// Selectors might overlap. Deduplicate them along the keyFunc.
+	rws := make(map[string]*monitoringv1alpha1.RemoteWrite)
+
+	selector, err := metav1.LabelSelectorAsSelector(cpf.RemoteWriteSelector)
+	if err != nil {
+		return nil, err
+	}
+
+	// If 'RemoteWriteNamespaceSelector' is nil only check own namespace.
+	if cpf.RemoteWriteNamespaceSelector == nil {
+		namespaces = append(namespaces, objMeta.GetNamespace())
+	} else {
+		nsSelector, err := metav1.LabelSelectorAsSelector(cpf.RemoteWriteNamespaceSelector)
+		if err != nil {
+			return nil, err
+		}
+
+		namespaces, err = operator.ListMatchingNamespaces(nsSelector, rs.namespaceInformers)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	rs.l.Debug("filtering namespaces to select RemoteWrites from", "namespaces", strings.Join(namespaces, ","), "namespace", objMeta.GetNamespace(), "prometheus", objMeta.GetName())
+
+	for _, ns := range namespaces {
+		err := listFn(ns, selector, func(obj interface{}) {
+			if k, ok := rs.accessor.MetaNamespaceKey(obj); ok {
+				rw := obj.(*monitoringv1alpha1.RemoteWrite).DeepCopy()
+				if err := k8sutil.AddTypeInformationToObject(rw); err != nil {
+					rs.l.Error("failed to set RemoteWrite type information", "namespace", ns, "err", err)
+					return
+				}
+				rws[k] = rw
+			}
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to list RemoteWrites in namespace %s: %w", ns, err)
+		}
+	}
+
+	var rejected int
+	res := make(map[string]*monitoringv1alpha1.RemoteWrite, len(rws))
+
+	for rwName, rw := range rws {
+		rejectFn := func(sc *monitoringv1alpha1.RemoteWrite, err error) {
+			rejected++
+			rs.l.Warn("skipping remotewrite",
+				"error", err.Error(),
+				"remotewrite", rwName,
+				"namespace", objMeta.GetNamespace(),
+				"prometheus", objMeta.GetName(),
+			)
+			rs.eventRecorder.Eventf(sc, v1.EventTypeWarning, operator.InvalidConfigurationEvent, "RemoteWrite %s was rejected due to invalid configuration: %v", rw.GetName(), err)
+		}
+
+		if err = AddRemoteWritesToStore(ctx, rs.store, rw.GetNamespace(), []monitoringv1.RemoteWriteSpec{rw.Spec}); err != nil {
+			rejectFn(rw, err)
+			continue
+		}
+
+		res[rwName] = rw
+	}
+
+	rwKeys := make([]string, 0)
+	for k := range res {
+		rwKeys = append(rwKeys, k)
+	}
+	rs.l.Debug("selected ScrapeConfigs", "remoteWrite", strings.Join(rwKeys, ","), "namespace", objMeta.GetNamespace(), "prometheus", objMeta.GetName())
+
+	if sKey, ok := rs.accessor.MetaNamespaceKey(rs.p); ok {
+		rs.metrics.SetSelectedResources(sKey, monitoringv1alpha1.RemoteWritesKind, len(res))
+		rs.metrics.SetRejectedResources(sKey, monitoringv1alpha1.RemoteWritesKind, rejected)
+	}
+
+	return res, nil
+}

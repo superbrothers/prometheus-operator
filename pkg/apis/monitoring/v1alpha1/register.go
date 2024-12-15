@@ -53,6 +53,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&PrometheusAgentList{},
 		&ScrapeConfig{},
 		&ScrapeConfigList{},
+		&RemoteWrite{},
+		&RemoteWriteList{},
 	)
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil

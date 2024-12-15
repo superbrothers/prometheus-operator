@@ -76,6 +76,7 @@ type Operator struct {
 	pmonInfs  *informers.ForResource
 	probeInfs *informers.ForResource
 	sconInfs  *informers.ForResource
+	rwInfs    *informers.ForResource
 	ruleInfs  *informers.ForResource
 	cmapInfs  *informers.ForResource
 	secrInfs  *informers.ForResource
@@ -89,6 +90,7 @@ type Operator struct {
 
 	endpointSliceSupported        bool
 	scrapeConfigSupported         bool
+	remoteWriteSupported          bool
 	canReadStorageClass           bool
 	disableUnmanagedConfiguration bool
 
@@ -108,6 +110,13 @@ func WithEndpointSlice() ControllerOption {
 func WithScrapeConfig() ControllerOption {
 	return func(o *Operator) {
 		o.scrapeConfigSupported = true
+	}
+}
+
+// WithRemoteWrite tells that the controller manages RemoteWrite objects.
+func WithRemoteWrite() ControllerOption {
+	return func(o *Operator) {
+		o.remoteWriteSupported = true
 	}
 }
 
@@ -265,6 +274,23 @@ func New(ctx context.Context, restConfig *rest.Config, c operator.Config, logger
 			return nil, fmt.Errorf("error creating scrapeconfigs informers: %w", err)
 		}
 	}
+
+	if o.remoteWriteSupported {
+		o.rwInfs, err = informers.NewInformersForResource(
+			informers.NewMonitoringInformerFactories(
+				c.Namespaces.AllowList,
+				c.Namespaces.DenyList,
+				mclient,
+				resyncPeriod,
+				nil,
+			),
+			monitoringv1alpha1.SchemeGroupVersion.WithResource(monitoringv1alpha1.RemoteWriteName),
+		)
+		if err != nil {
+			return nil, fmt.Errorf("error creating remotewrites informers: %w", err)
+		}
+	}
+
 	o.ruleInfs, err = informers.NewInformersForResource(
 		informers.NewMonitoringInformerFactories(
 			c.Namespaces.AllowList,
@@ -385,6 +411,7 @@ func (c *Operator) waitForCacheSync(ctx context.Context) error {
 		{"PrometheusRule", c.ruleInfs},
 		{"Probe", c.probeInfs},
 		{"ScrapeConfig", c.sconInfs},
+		{"RemoteWrite", c.rwInfs},
 		{"ConfigMap", c.cmapInfs},
 		{"Secret", c.secrInfs},
 		{"StatefulSet", c.ssetInfs},
@@ -458,6 +485,16 @@ func (c *Operator) addHandlers() {
 		))
 	}
 
+	if c.rwInfs != nil {
+		c.rwInfs.AddEventHandler(operator.NewEventHandler(
+			c.logger,
+			c.accessor,
+			c.metrics,
+			monitoringv1alpha1.RemoteWritesKind,
+			c.enqueueForMonitorNamespace,
+		))
+	}
+
 	c.ruleInfs.AddEventHandler(operator.NewEventHandler(
 		c.logger,
 		c.accessor,
@@ -503,6 +540,9 @@ func (c *Operator) Run(ctx context.Context) error {
 	go c.probeInfs.Start(ctx.Done())
 	if c.scrapeConfigSupported {
 		go c.sconInfs.Start(ctx.Done())
+	}
+	if c.remoteWriteSupported {
+		go c.rwInfs.Start(ctx.Done())
 	}
 	go c.ruleInfs.Start(ctx.Done())
 	go c.cmapInfs.Start(ctx.Done())
@@ -1125,6 +1165,14 @@ func (c *Operator) createOrUpdateConfigurationSecret(ctx context.Context, p *mon
 		}
 	}
 
+	var rws map[string]*monitoringv1alpha1.RemoteWrite
+	if c.rwInfs != nil {
+		rws, err = resourceSelector.SelectRemoteWrites(ctx, c.rwInfs.ListAllByNamespace)
+		if err != nil {
+			return fmt.Errorf("selecting RemoteWrites failed: %w", err)
+		}
+	}
+
 	if err := prompkg.AddRemoteReadsToStore(ctx, store, p.GetNamespace(), p.Spec.RemoteRead); err != nil {
 		return err
 	}
@@ -1176,6 +1224,7 @@ func (c *Operator) createOrUpdateConfigurationSecret(ctx context.Context, p *mon
 		pmons,
 		bmons,
 		scrapeConfigs,
+		rws,
 		store,
 		additionalScrapeConfigs,
 		additionalAlertRelabelConfigs,

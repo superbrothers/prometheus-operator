@@ -201,6 +201,22 @@ type CommonPrometheusFields struct {
 	// +optional
 	ScrapeConfigNamespaceSelector *metav1.LabelSelector `json:"scrapeConfigNamespaceSelector,omitempty"`
 
+	// RemoteWrite objects to be selected. An empty label selector matches all
+	// objects. A null label selector matches no objects.
+	//
+	// Note that the RemoteWrite custom resource definition is currently at Alpha level.
+	//
+	// +optional
+	RemoteWriteSelector *metav1.LabelSelector `json:"remoteWriteSelector,omitempty"`
+	// Namespaces to match for RemoteWrite discovery. An empty label selector
+	// matches all namespaces. A null label selector matches the current
+	// namespace only.
+	//
+	// Note that the RemoteWrite custom resource definition is currently at Alpha level.
+	//
+	// +optional
+	RemoteWriteNamespaceSelector *metav1.LabelSelector `json:"remoteWriteNamespaceSelector,omitempty"`
+
 	// Version of Prometheus being deployed. The operator uses this information
 	// to generate the Prometheus StatefulSet + configuration files.
 	//
